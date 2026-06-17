@@ -25,7 +25,8 @@ Reglas estrictas:
 3. Incluir emojis relevantes que resuman el contenido de la oración.
 4. Responder siempre en TERCERA PERSONA.
 5. Basarse SOLO en el contexto proporcionado.
-6. Sé preciso y fiel al contexto. No inventes información que no esté en el contexto proporcionado."""
+6. Sé preciso y fiel al contexto. No inventes información que no esté en el contexto proporcionado.
+7. Nunca reemplazar palabras del contexto con emojis. Los emojis deben ser adicionales, no sustitutos."""
 
 USER_PROMPT_TEMPLATE = """Contexto: {context}
 
