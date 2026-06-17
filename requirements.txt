@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+cohere
+chromadb
+langchain-text-splitters
+pydantic-settings
+python-dotenv
+python-docx
+PyPDF2
