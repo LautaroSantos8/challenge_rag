@@ -6,7 +6,7 @@ class Settings(BaseSettings):
 
     # Cohere
     COHERE_API_KEY: str
-    LLM_MODEL: str = "command-r-plus"
+    LLM_MODEL: str = "command-r-plus-08-2024"
     EMBEDDING_MODEL: str = "embed-multilingual-v3.0"
     LLM_TEMPERATURE: float = 0.0
 
@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     CHROMA_COLLECTION_NAME: str = "document_collection"
 
     # Procesamiento del documento
-    CHUNK_SIZE: int = 300
+    CHUNK_SIZE: int = 500
     CHUNK_OVERLAP: int = 50
 
     LOG_LEVEL: str = "DEBUG"

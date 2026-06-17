@@ -39,7 +39,7 @@ class VectorStore:
         """Encodea la pregunta y busca los documentos más relevantes."""
         query_embedding = self._encode([query_text], input_type="search_query")
         results = self.collection.query(
-            query_embeddings=[query_embedding],
+            query_embeddings=query_embedding,
             n_results=n_results
         )
         return results["documents"][0]
