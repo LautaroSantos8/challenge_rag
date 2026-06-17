@@ -7,8 +7,9 @@ class VectorStore:
     """Wrapper para operaciones con ChromaDB."""
 
     def __init__(self):
-        """Inicializa el cliente de ChromaDB, Cohere y la colección."""
-        self.chroma_client = chromadb.Client()
+        self.chroma_client = chromadb.PersistentClient(
+            path=settings.CHROMA_PERSIST_DIR
+        )
         self.cohere_client = cohere.Client(api_key=settings.COHERE_API_KEY)
 
         self.collection = self.chroma_client.get_or_create_collection(
@@ -38,11 +39,10 @@ class VectorStore:
         """Encodea la pregunta y busca los documentos más relevantes."""
         query_embedding = self._encode([query_text], input_type="search_query")
         results = self.collection.query(
-            query_embeddings=query_embedding,
+            query_embeddings=[query_embedding],
             n_results=n_results
         )
         return results["documents"][0]
 
     def count(self) -> int:
-        """Retorna la cantidad de documentos en la colección."""
         return self.collection.count()

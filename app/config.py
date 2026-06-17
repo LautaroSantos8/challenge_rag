@@ -19,6 +19,8 @@ class Settings(BaseSettings):
 
     LOG_LEVEL: str = "DEBUG"
 
+    CHROMA_PERSIST_DIR: str = "./chroma_db"
+
     class Config:
         env_file = ".env"
 
