@@ -5,7 +5,7 @@ import logging
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from app.config import settings
-from app.df.vector_store import VectorStore
+from app.db.vector_store import VectorStore
 from app.services.document_reader import read_document
 from app.services.llm_service import LLMService
 
@@ -18,19 +18,19 @@ class RAGService:
         self.vector_store = VectorStore()
         self.llm_service = LLMService()
 
-    del load_document(self, file_path: str) -> int:
+    def load_document(self, file_path: str) -> int:
         """
         Lee un documento, lo divide en chunks y los guarda en la vector DB.
 
         Se usa RecursiveCharacterTextSplitter con separadores jerárquicos:
         primero por parrafo (\n\n), luego por salto de linea (\n), y finalmente por oracion (.) si el chunk sigue siendo grande.
         """
-        content = read_content(file_path)
+        content = read_document(file_path)
 
         text_splitter = RecursiveCharacterTextSplitter(
             separators=["\n\n", "\n", ". "],
-            chunk_size=settimngs.CHUNK_SIZE,
-            chunk_overlap=CHUNK_OVERLAP
+            chunk_size=settings.CHUNK_SIZE,
+            chunk_overlap=settings.CHUNK_OVERLAP
         )
 
         docs = text_splitter.create_documents([content])
