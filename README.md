@@ -4,36 +4,29 @@ Sistema RAG que permite hacer preguntas sobre documentos utilizando Cohere como 
 
 ## Arquitectura
 
-challenge_rag/
-├── Dockerfile                   # Contenedor de la API
-├── Dockerfile.frontend          # Contenedor del frontend
-├── PROMPT.md                    # Documentación del prompt
-├── README.md
-├── app
-│   ├── __init__.py
-│   ├── api
-│   │   ├── __init__.py
-│   │   └── routes.py            # Endpoints de la API
-│   ├── config.py                # Configuración centralizada desde .env
-│   ├── db
-│   │   ├── __init__.py
-│   │   └── vector_store.py      # ChromaDB con persistencia
-│   ├── main.py                  # App FastAPI con carga automática de documentos
-│   ├── models
-│   │   ├── __init__.py
-│   │   └── schemas.py           # Schemas de request y response
-│   └── services
-│       ├── __init__.py
-│       ├── document_reader.py   # Lector de .docx y .pdf
-│       ├── llm_service.py       # Integración con Cohere y prompts
-│       └── rag_service.py       # Orquestador del pipeline RAG
-├── data                         # Documentos fuente
-│   └── documento.docx
-├── docker-compose.yml           # Orquestación de servicios
-├── frontend.py                  # Frontend Streamlit
-├── postman_collection.json      # Colección para pruebas
-├── requirements.txt
-└── run.py
+    challenge_rag/
+    ├── app/
+    │   ├── main.py                  # App FastAPI con carga automática
+    │   ├── config.py                # Configuración desde .env
+    │   ├── api/
+    │   │   └── routes.py            # Endpoints de la API
+    │   ├── models/
+    │   │   └── schemas.py           # Schemas request/response
+    │   ├── services/
+    │   │   ├── rag_service.py       # Orquestador del pipeline RAG
+    │   │   ├── llm_service.py       # Integración con Cohere y prompts
+    │   │   └── document_reader.py   # Lector de .docx y .pdf
+    │   └── db/
+    │       └── vector_store.py      # ChromaDB con persistencia
+    ├── data/                        # Documentos fuente
+    ├── frontend.py                  # Frontend Streamlit
+    ├── Dockerfile                   # Contenedor de la API
+    ├── Dockerfile.frontend          # Contenedor del frontend
+    ├── docker-compose.yml           # Orquestación de servicios
+    ├── postman_collection.json      # Colección para pruebas
+    ├── PROMPT.md                    # Documentación del prompt
+    ├── requirements.txt
+    └── run.py
 
 ## Requisitos previos
 
