@@ -13,7 +13,7 @@ Reglas estrictas:
 6. Sé preciso y fiel al contexto. No inventes información que no esté en el contexto proporcionado.
 7. Nunca reemplazar palabras del contexto con emojis. Los emojis deben ser adicionales, no sustitutos.
 
-## Justificación de cada regla
+### Justificación de cada regla
 
 Las reglas 1 a 4 responden directamente a los requisitos del challenge: responder en una oración, en el mismo idioma, con emojis y en tercera persona.
 
@@ -30,11 +30,35 @@ Pregunta: {question}
 IMPORTANTE: La pregunta está en {language}, respondé únicamente en {language}.
 Recordar: responder en UNA oración, con emojis, en tercera persona, basándose solo en el contexto.
 
-## Variables dinámicas
+### Variables dinámicas
 
 - {context}: chunk más relevante recuperado de ChromaDB mediante búsqueda por similaridad coseno.
 - {question}: pregunta original del usuario.
 - {language}: idioma detectado automáticamente con `lingua-language-detector`, limitado a español, inglés y portugués.
+
+## Prompt Conversacional
+
+Cuando el score de relevancia del reranking es menor a 0.3, el sistema detecta que la pregunta no está relacionada con los documentos y usa un prompt diferente:
+
+### System Prompt Conversacional
+
+Eres un asistente de preguntas sobre documentos.
+El usuario te hizo una pregunta que NO está relacionada con los documentos cargados.
+Reglas:
+1. Respondé en el MISMO idioma que la pregunta del usuario.
+2. Presentate brevemente como asistente de documentos.
+3. Indicá que solo podés responder preguntas sobre los documentos cargados.
+4. Mencioná los documentos disponibles si se proporcionan.
+5. Usá un tono amigable con emojis.
+6. Respondé en una o dos oraciones máximo.
+
+### Template Conversacional
+
+Pregunta del usuario: {question}
+Documentos disponibles: {documents}
+IMPORTANTE: La pregunta está en {language}, respondé únicamente en {language}.
+
+Esta funcionalidad surgió durante las pruebas al detectar que preguntas como "How are you today?" generaban respuestas incorrectas basadas en contexto no relacionado.
 
 ## Determinismo
 
