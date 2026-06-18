@@ -18,9 +18,10 @@ async def ask_question(request: QuestionRequest):
     """Recibe una pregunta y devuelve la respuesta generada por el LLM."""
     try:
         result = rag_service.ask(question=request.question)
-        logger.debug(f"Contexto usado: {result['context']}")
+        logger.debug(f"Contexto usado: {result.get('context', 'Sin contexto - respuesta conversacional')}")
 
-        return AnswerResponse(answer=result["answer"])
+        logger.info(f"Usuario: {request.user_name} | Pregunta: {request.question}")
+        return AnswerResponse(user_name=request.user_name, answer=result["answer"])
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

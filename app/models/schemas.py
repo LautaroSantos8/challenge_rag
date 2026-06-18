@@ -9,4 +9,5 @@ class QuestionRequest(BaseModel):
 
 class AnswerResponse(BaseModel):
     """Esquema de la respuesta de la API."""
+    user_name: str
     answer: str
