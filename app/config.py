@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "DEBUG"
 
     CHROMA_PERSIST_DIR: str = "./chroma_db"
+    RERANK_MODEL: str = "rerank-v3.5"
 
     class Config:
         env_file = ".env"

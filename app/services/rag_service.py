@@ -2,6 +2,7 @@ import os
 import uuid
 import logging
 import re
+import cohere
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
@@ -19,6 +20,7 @@ class RAGService:
         self.vector_store = VectorStore()
         self.llm_service = LLMService()
         self.cache = {}
+        self.cohere_client = cohere.Client(api_key=settings.COHERE_API_KEY)
 
     def load_document(self, file_path: str) -> int:
         """
@@ -69,9 +71,9 @@ class RAGService:
         """
         Procesa una pregunta a través del pipeline RAG.
         1. Verifica si la pregunta ya está en caché.
-        2. Si no, encodea la pregunta.
-        3. Busca el chunk más relevante en ChromaDB.
-        4. Pasa el chunk como contexto al LLM.
+        2. Encodea la pregunta y recupera los 3 chunks más similares de ChromaDB.
+        3. Reordena los chunks con Cohere Rerank para seleccionar el más relevante.
+        4. Pasa el mejor chunk como contexto al LLM para generar la respuesta.
         5. Guarda en caché y retorna la respuesta.
         """
         normalized = self._normalize(question)
@@ -80,10 +82,19 @@ class RAGService:
             logger.debug("Respuesta obtenida desde caché")
             return self.cache[normalized]
 
-        relevant_docs = self.vector_store.query(
-            query_text=question, n_results=1
+        relevant_docs = self.vector_store.query(query_text=question, n_results=3)
+
+        # reordenar por relevancia real
+        rerank_response = self.cohere_client.rerank(
+            model=settings.RERANK_MODEL,
+            query=question,
+            documents=relevant_docs,
+            top_n=1
         )
-        context = relevant_docs[0] if relevant_docs else ""
+        best_index = rerank_response.results[0].index
+        context = relevant_docs[best_index]
+
+        logger.debug(f"Rerank: chunk {best_index} seleccionado de {len(relevant_docs)} candidatos")
         logger.debug(f"Contexto recuperado: {context}")
 
         answer = self.llm_service.generate_answer(
@@ -93,5 +104,4 @@ class RAGService:
 
         result = {"answer": answer, "context": context}
         self.cache[normalized] = result
-
         return result
