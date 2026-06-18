@@ -1,6 +1,7 @@
 import os
 import uuid
 import logging
+import re
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
@@ -17,6 +18,7 @@ class RAGService:
     def __init__(self):
         self.vector_store = VectorStore()
         self.llm_service = LLMService()
+        self.cache = {}
 
     def load_document(self, file_path: str) -> int:
         """
@@ -42,20 +44,31 @@ class RAGService:
 
         return len(docs)
 
+    def _normalize(self, question: str) -> str:
+        """Normaliza la pregunta para usar como clave del caché."""
+        question = question.lower().strip()
+        question = re.sub(r'[¿?!¡]', '', question)
+        return question
+
     def ask(self, question: str) -> dict:
         """
         Procesa una pregunta a través del pipeline RAG.
-
-        1. Encodea la pregunta.
-        2. Busca el chunk más relevante en ChromaDB.
-        3. Pasa el chunk como contexto al LLM.
-        4. Retorna la respuesta generada.
+        1. Verifica si la pregunta ya está en caché.
+        2. Si no, encodea la pregunta.
+        3. Busca el chunk más relevante en ChromaDB.
+        4. Pasa el chunk como contexto al LLM.
+        5. Guarda en caché y retorna la respuesta.
         """
+        normalized = self._normalize(question)
+
+        if normalized in self.cache:
+            logger.debug("Respuesta obtenida desde caché")
+            return self.cache[normalized]
+
         relevant_docs = self.vector_store.query(
             query_text=question, n_results=1
         )
         context = relevant_docs[0] if relevant_docs else ""
-
         logger.debug(f"Contexto recuperado: {context}")
 
         answer = self.llm_service.generate_answer(
@@ -63,4 +76,7 @@ class RAGService:
             context=context
         )
 
-        return {"answer": answer, "context": context}
+        result = {"answer": answer, "context": context}
+        self.cache[normalized] = result
+
+        return result
