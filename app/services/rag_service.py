@@ -103,5 +103,10 @@ class RAGService:
         )
 
         result = {"answer": answer, "context": context}
+        
+        if len(self.cache) >= settings.CACHE_MAX_SIZE:
+            oldest_key = next(iter(self.cache))
+            del self.cache[oldest_key]
+
         self.cache[normalized] = result
         return result

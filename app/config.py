@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     CHROMA_PERSIST_DIR: str = "./chroma_db"
     RERANK_MODEL: str = "rerank-v3.5"
 
+    CACHE_MAX_SIZE: int = 100
+
     class Config:
         env_file = ".env"
 

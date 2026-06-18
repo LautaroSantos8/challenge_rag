@@ -45,6 +45,18 @@ class VectorStore:
 
         return len(ids_to_delete)
 
+    def count_documents(self) -> int:
+        """Retorna la cantidad de documentos únicos en la colección."""
+        all_ids = self.collection.get()["ids"]
+        unique_docs = set(id.rsplit("_chunk_", 1)[0] for id in all_ids)
+        return len(unique_docs)
+
+    def list_documents(self) -> list[str]:
+        """Retorna los nombres de los documentos cargados."""
+        all_ids = self.collection.get()["ids"]
+        unique_docs = set(id.rsplit("_chunk_", 1)[0] for id in all_ids)
+        return list(unique_docs)
+
     def query(self, query_text: str, n_results: int = 1) -> list[str]:
         """Encodea la pregunta y busca los documentos más relevantes."""
         query_embedding = self._encode([query_text], input_type="search_query")

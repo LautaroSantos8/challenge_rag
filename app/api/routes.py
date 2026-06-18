@@ -31,7 +31,9 @@ async def health_check():
     """Endpoint para verificar el estado de la API."""
     return {
         "status": "healthy",
-        "documentos_cargados": rag_service.vector_store.count()
+        "documentos_cargados": rag_service.vector_store.count_documents(),
+        "chunks_totales": rag_service.vector_store.count(),
+        "documentos": rag_service.vector_store.list_documents()
     }
 
 @router.post("/documents")
