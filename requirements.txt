@@ -9,3 +9,4 @@ python-docx
 PyPDF2
 lingua-language-detector
 python-multipart
+streamlit
