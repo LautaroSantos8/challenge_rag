@@ -35,6 +35,22 @@ Pregunta: {question}
 IMPORTANTE: La pregunta está en {language}, respondé únicamente en {language}.
 Recordar: responder en UNA oración, con emojis, en tercera persona, basándose solo en el contexto."""
 
+CONVERSATION_PROMPT = """Eres un asistente de preguntas sobre documentos. 
+El usuario te hizo una pregunta que NO está relacionada con los documentos cargados.
+
+Reglas:
+1. Respondé en el MISMO idioma que la pregunta del usuario.
+2. Presentate brevemente como asistente de documentos.
+3. Indicá que solo podés responder preguntas sobre los documentos cargados.
+4. Mencioná los documentos disponibles si se proporcionan.
+5. Usá un tono amigable con emojis.
+6. Respondé en una o dos oraciones máximo."""
+
+CONVERSATION_TEMPLATE = """Pregunta del usuario: {question}
+Documentos disponibles: {documents}
+
+IMPORTANTE: La pregunta está en {language}, respondé únicamente en {language}."""
+
 
 class LLMService:
     """Servicio para interactuar con el LLM de Cohere."""
@@ -56,6 +72,26 @@ class LLMService:
         response = self.client.chat(
             model=settings.LLM_MODEL,
             preamble=SYSTEM_PROMPT,
+            message=user_message,
+            temperature=settings.LLM_TEMPERATURE
+        )
+
+        return response.text
+
+    def generate_conversation(self, question: str, documents: list[str]) -> str:
+        detected = detector.detect_language_of(question)
+        language = LANGUAGE_MAP.get(detected, "español")
+        doc_list = ", ".join(documents) if documents else "ninguno"
+
+        user_message = CONVERSATION_TEMPLATE.format(
+            question=question,
+            documents=doc_list,
+            language=language
+        )
+
+        response = self.client.chat(
+            model=settings.LLM_MODEL,
+            preamble=CONVERSATION_PROMPT,
             message=user_message,
             temperature=settings.LLM_TEMPERATURE
         )

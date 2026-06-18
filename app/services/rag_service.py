@@ -73,8 +73,9 @@ class RAGService:
         1. Verifica si la pregunta ya está en caché.
         2. Encodea la pregunta y recupera los 3 chunks más similares de ChromaDB.
         3. Reordena los chunks con Cohere Rerank para seleccionar el más relevante.
-        4. Pasa el mejor chunk como contexto al LLM para generar la respuesta.
-        5. Guarda en caché y retorna la respuesta.
+        4. Si el score es bajo, responde conversacionalmente.
+        5. Si el score es alto, pasa el mejor chunk como contexto al LLM.
+        6. Guarda en caché y retorna la respuesta.
         """
         normalized = self._normalize(question)
 
@@ -84,17 +85,35 @@ class RAGService:
 
         relevant_docs = self.vector_store.query(query_text=question, n_results=3)
 
-        # reordenar por relevancia real
+        # Reordenar por relevancia real
         rerank_response = self.cohere_client.rerank(
             model=settings.RERANK_MODEL,
             query=question,
             documents=relevant_docs,
             top_n=1
         )
-        best_index = rerank_response.results[0].index
-        context = relevant_docs[best_index]
 
-        logger.debug(f"Rerank: chunk {best_index} seleccionado de {len(relevant_docs)} candidatos")
+        best_result = rerank_response.results[0]
+        best_index = best_result.index
+        relevance_score = best_result.relevance_score
+
+        logger.debug(f"Rerank: chunk {best_index} seleccionado, score: {relevance_score}")
+
+        # Si el score es bajo, la pregunta no es sobre los documentos
+        if relevance_score < 0.3:
+            docs = self.vector_store.list_documents()
+            answer = self.llm_service.generate_conversation(
+                question=question,
+                documents=docs
+            )
+            result = {"answer": answer}
+            if len(self.cache) >= settings.CACHE_MAX_SIZE:
+                oldest_key = next(iter(self.cache))
+                del self.cache[oldest_key]
+            self.cache[normalized] = result
+            return result
+
+        context = relevant_docs[best_index]
         logger.debug(f"Contexto recuperado: {context}")
 
         answer = self.llm_service.generate_answer(
@@ -103,10 +122,8 @@ class RAGService:
         )
 
         result = {"answer": answer, "context": context}
-        
         if len(self.cache) >= settings.CACHE_MAX_SIZE:
             oldest_key = next(iter(self.cache))
             del self.cache[oldest_key]
-
         self.cache[normalized] = result
         return result
