@@ -29,11 +29,21 @@ class VectorStore:
     def add_documents(self, documents: list[str], ids: list[str]) -> None:
         """Encodea y agrega documentos a la colección."""
         embeddings = self._encode(documents, input_type="search_document")
-        self.collection.add(
+        self.collection.upsert(
             documents=documents,
             embeddings=embeddings,
             ids=ids
         )
+
+    def delete_by_filename(self, filename: str) -> int:
+        """Elimina todos los chunks asociados a un archivo."""
+        all_ids = self.collection.get()["ids"]
+        ids_to_delete = [id for id in all_ids if id.startswith(filename)]
+
+        if ids_to_delete:
+            self.collection.delete(ids=ids_to_delete)
+
+        return len(ids_to_delete)
 
     def query(self, query_text: str, n_results: int = 1) -> list[str]:
         """Encodea la pregunta y busca los documentos más relevantes."""

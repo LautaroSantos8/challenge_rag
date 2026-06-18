@@ -50,6 +50,21 @@ class RAGService:
         question = re.sub(r'[¿?!¡]', '', question)
         return question
 
+    def delete_document(self, filename: str) -> int:
+        """Elimina un documento y sus chunks de la vector DB y del disco."""
+        data_dir = os.path.join(os.path.dirname(__file__), "..", "..", "data")
+        file_path = os.path.abspath(os.path.join(data_dir, filename))
+
+        deleted = self.vector_store.delete_by_filename(filename)
+
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+        self.cache = {}
+
+        logger.info(f"Eliminado {filename}: {deleted} chunks borrados")
+        return deleted
+
     def ask(self, question: str) -> dict:
         """
         Procesa una pregunta a través del pipeline RAG.
